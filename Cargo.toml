@@ -1,0 +1,73 @@
+[package]
+name = "shadowsocks-rust"
+version = "1.8.0-alpha.3"
+authors = ["Y. T. CHUNG <zonyitoo@gmail.com>"]
+description = "shadowsocks is a fast tunnel proxy that helps you bypass firewalls."
+repository = "https://github.com/zonyitoo/shadowsocks-rust"
+documentation = "https://docs.rs/shadowsocks-rust"
+keywords = ["shadowsocks", "proxy", "socks", "socks5", "firewall"]
+license = "MIT"
+edition = "2018"
+
+[lib]
+name = "shadowsocks"
+
+[[bin]]
+name = "sslocal"
+path = "src/bin/local.rs"
+
+[[bin]]
+name = "ssserver"
+path = "src/bin/server.rs"
+
+[[bin]]
+name = "sstunnel"
+path = "src/bin/tunnel.rs"
+
+[[bin]]
+name = "ssurl"
+path = "src/bin/ssurl.rs"
+
+[profile.release]
+lto = true
+
+[features]
+default = ["sodium", "rc4", "aes-cfb", "aes-ctr", "trust-dns"]
+sodium = ["libsodium-ffi"]
+rc4 = ["openssl"]
+aes-cfb = ["openssl"]
+aes-ctr = ["openssl"]
+camellia-cfb = ["openssl"]
+single-threaded = []
+trust-dns = ["trust-dns-resolver"]
+
+[dependencies]
+log = "0.4"
+rand = "0.7"
+time = "0.1"
+clap = "2.33"
+env_logger = "0.7"
+openssl = { version = "0.10", optional = true }
+libc = "0.2"
+tokio = { version = "0.2", features = ["full"] }
+futures = "0.3"
+json5 = "0.2"
+base64 = "0.11"
+bytes = "0.5"
+byteorder = "1"
+ring = "0.16"
+md-5 = "0.8"
+digest = "0.8"
+typenum = "1.11"
+qrcode = { version = "0.11", default-features = false }
+serde_urlencoded = "0.6"
+serde = { version = "1.0", features = ["derive"] }
+url = "2.1"
+byte_string = "1.0"
+libsodium-ffi = { version = "0.2", optional = true }
+miscreant = { version = "0.4", optional = true }
+trust-dns-resolver = { version = "0.18.0-alpha", features = ["dns-over-rustls", "dns-over-https-rustls"], optional = true }
+hkdf = "0.8"
+hmac = "0.7"
+sha-1 = "0.8"
+lru_time_cache = "0.9"

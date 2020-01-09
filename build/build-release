@@ -1,0 +1,61 @@
+#!/bin/sh
+
+CUR_DIR=$( cd $( dirname $0 ) && pwd )
+VERSION=$(grep -E '^version' ${CUR_DIR}/../Cargo.toml | awk '{print $3}' | sed 's/"//g')
+
+## Disable OS X ACL file
+export COPYFILE_DISABLE=1
+
+function build() {
+    cd "$CUR_DIR/.."
+
+    TARGET=$1
+    echo "* Building ${TARGET} package ${VERSION} ..."
+
+    RELEASE_DIR="target/${TARGET}/release"
+
+    cross build --target "${TARGET}" \
+                --features "miscreant" \
+                --release
+
+    if [[ $? != "0" ]]; then
+        exit $?
+    fi
+
+    if [[ "$TARGET" == *"-linux-"* ]]; then
+        PKG_NAME="shadowsocks-v${VERSION}-stable.${TARGET}.tar.xz"
+        PKG_PATH="${CUR_DIR}/${PKG_NAME}"
+
+        echo "* Packaging XZ in ${PKG_PATH} ..."
+        cd ${RELEASE_DIR}
+        tar -cJf ${PKG_PATH} \
+            "sslocal" \
+            "ssserver" \
+            "ssurl" \
+            "sstunnel"
+
+        if [[ $? != "0" ]]; then
+            exit $?
+        fi
+    elif [[ "$TARGET" == *"-windows-"* ]]; then
+        PKG_NAME="shadowsocks-v${VERSION}-stable.${TARGET}.zip"
+        PKG_PATH="${CUR_DIR}/${PKG_NAME}"
+
+        echo "* Packaging ZIP in ${PKG_PATH} ..."
+        cd ${RELEASE_DIR}
+        zip ${PKG_PATH} \
+            "sslocal.exe" \
+            "ssserver.exe" \
+            "ssurl.exe" \
+            "sstunnel.exe"
+
+        if [[ $? != "0" ]]; then
+            exit $?
+        fi
+    fi
+
+    echo "* Done build package ${PKG_NAME}"
+}
+
+build "x86_64-unknown-linux-musl"
+build "x86_64-pc-windows-gnu"
